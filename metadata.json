@@ -1,0 +1,11 @@
+{
+  "name": "Lumina Focus: Bilişsel Verimlilik Platformu",
+  "description": "Öğrenciler için bilişsel yükü azaltan, Pomodoro tabanlı, dikkat yönetimi ve AI destekli verimlilik odaklı entegre bir platform.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
