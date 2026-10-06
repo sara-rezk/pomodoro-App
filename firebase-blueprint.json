@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile state containing levels, experience points, streaks, and styling preferences.",
+      "type": "object",
+      "properties": {
+        "xp": { "type": "number", "description": "The user's experience points." },
+        "level": { "type": "number", "description": "The user's progress level." },
+        "streak": { "type": "number", "description": "The user's current daily streak." },
+        "lastActive": { "type": "string", "format": "date-time", "description": "The last UTC timestamp the user was active." },
+        "avatar": { "type": "string", "description": "The emoji avatar chosen by the user." },
+        "background": { "type": "string", "description": "The selected CSS background theme string." },
+        "language": { "type": "string", "enum": ["tr", "en"], "description": "The preferred language UI locale code." },
+        "theme": { "type": "string", "enum": ["dark", "light", "contrast"], "description": "The selected layout color theme." },
+        "preferredPlaylist": { "type": "string", "description": "The preferred audio playlist embed link URL." }
+      },
+      "required": ["xp", "level", "streak", "lastActive", "avatar", "background", "language", "theme"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A planning task or protocol decomposed to simple steps.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique task identifier." },
+        "title": { "type": "string", "description": "The title or action of the task." },
+        "description": { "type": "string", "description": "Detailed notes on what this task entails." },
+        "duration": { "type": "number", "description": "Estimated minutes required for task focus." },
+        "completed": { "type": "boolean", "description": "Whether the task has been finished by user." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The UTC timestamp the task was created." },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"], "description": "The priority level." }
+      },
+      "required": ["id", "title", "description", "duration", "completed", "createdAt"]
+    },
+    "Flashcard": {
+      "title": "Flashcard",
+      "description": "A spaced repetition memory card.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique card identifier." },
+        "question": { "type": "string", "description": "The prompt or front of the card." },
+        "answer": { "type": "string", "description": "The response or back of the card." },
+        "interval": { "type": "number", "description": "Days review interval." },
+        "repetition": { "type": "number", "description": "Count of consecutive reviews." },
+        "easeFactor": { "type": "number", "description": "Spaced repetition difficulty coefficient." },
+        "nextReview": { "type": "string", "format": "date-time", "description": "The scheduled boundary of next self-test." }
+      },
+      "required": ["id", "question", "answer", "interval", "repetition", "easeFactor", "nextReview"]
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "A continuous multi-hour target tracker.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique goal identifier." },
+        "title": { "type": "string", "description": "The description or name of the target goal." },
+        "targetHours": { "type": "number", "description": "Total target study hours." },
+        "currentHours": { "type": "number", "description": "Fulfilled study hours tracked so far." },
+        "deadline": { "type": "string", "format": "date-time", "description": "The end target deadline." },
+        "category": { "type": "string", "description": "The associated department or category label." }
+      },
+      "required": ["id", "title", "targetHours", "currentHours", "deadline", "category"]
+    },
+    "SessionTodo": {
+      "title": "SessionTodo",
+      "description": "An interactive task item tied to the active study session.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique session todo identifier." },
+        "text": { "type": "string", "description": "The description or action required." },
+        "completed": { "type": "boolean", "description": "Whether the task is finished." },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"], "description": "The optional priority tag." }
+      },
+      "required": ["id", "text", "completed"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Global user statistics, leveling and styling preferences."
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Sub-collection containing decomposed tasks belonging to the user."
+    },
+    "/users/{userId}/flashcards/{cardId}": {
+      "schema": "Flashcard",
+      "description": "Sub-collection containing memory cards scheduled for review."
+    },
+    "/users/{userId}/goals/{goalId}": {
+      "schema": "Goal",
+      "description": "Sub-collection containing multi-hour targets defined by user."
+    },
+    "/users/{userId}/session_todos/{todoId}": {
+      "schema": "SessionTodo",
+      "description": "Sub-collection containing session-specific todo list items."
+    }
+  }
+}

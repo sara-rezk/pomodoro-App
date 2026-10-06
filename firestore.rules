@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default catch-all denies everything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Entity validation schema guards
+    function isValidUserProfile(user) {
+      return user != null 
+        && user.xp is int
+        && user.level is int
+        && user.streak is int
+        && user.lastActive is string
+        && user.avatar is string
+        && user.background is string
+        && user.theme is string
+        && user.language is string;
+    }
+
+    function isValidTask(task) {
+      return task != null
+        && task.id is string
+        && task.title is string
+        && task.description is string
+        && task.completed is bool
+        && task.createdAt is string;
+    }
+
+    function isValidFlashcard(card) {
+      return card != null
+        && card.id is string
+        && card.question is string
+        && card.answer is string
+        && card.interval is int
+        && card.repetition is int
+        && card.nextReview is string;
+    }
+
+    function isValidGoal(goal) {
+      return goal != null
+        && goal.id is string
+        && goal.title is string
+        && goal.deadline is string
+        && goal.category is string;
+    }
+
+    function isValidSessionTodo(todo) {
+      return todo != null
+        && todo.id is string
+        && todo.text is string
+        && todo.completed is bool;
+    }
+
+    // Path matching rulesets for Lumina Focus Space
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidUserProfile(incoming());
+      allow delete: if isOwner(userId);
+
+      match /tasks/{taskId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidTask(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      match /flashcards/{cardId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidFlashcard(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      match /goals/{goalId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidGoal(incoming());
+        allow delete: if isOwner(userId);
+      }
+
+      match /session_todos/{todoId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidSessionTodo(incoming());
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

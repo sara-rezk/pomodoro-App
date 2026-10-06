@@ -94,3 +94,10 @@ body {
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* RTL & Arabic Support */
+html[dir="rtl"] {
+  direction: rtl;
+  font-family: "Segoe UI", Tahoma, "Cairo", "Noto Sans Arabic", system-ui, -apple-system, sans-serif;
+}
+

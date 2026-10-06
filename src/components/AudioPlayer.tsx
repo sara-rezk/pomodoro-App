@@ -4,10 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Language, translations } from '../lib/i18n';
 
 const SOUNDS = [
-  { id: 'lofi', names: { tr: 'Lo-Fi Radyo', en: 'Lo-Fi Radio' }, icon: Music, url: 'https://stream.zeno.fm/0r0xa792kwzuv' },
-  { id: 'rain', names: { tr: 'Yağmur Sesi', en: 'Rain Sounds' }, icon: CloudRain, url: 'https://www.soundjay.com/nature/rain-03.mp3' },
-  { id: 'nature', names: { tr: 'Orman Sesi', en: 'Forest Sounds' }, icon: Trees, url: 'https://www.soundjay.com/nature/forest-01.mp3' },
-  { id: 'wind', names: { tr: 'Rüzgar Sesi', en: 'Wind Sounds' }, icon: Wind, url: 'https://www.soundjay.com/nature/wind-01.mp3' },
+  { id: 'lofi', names: { tr: 'Lo-Fi Radyo', en: 'Lo-Fi Radio', ar: 'راديو لو-فاي' }, icon: Music, url: 'https://stream.zeno.fm/0r0xa792kwzuv' },
 ];
 
 interface AudioPlayerProps {
@@ -61,7 +58,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ language, preferredPla
   };
 
   return (
-    <div className="glass-panel p-6 space-y-6">
+    <div className="glass-panel p-6 space-y-6 shrink-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
             <button 
@@ -89,19 +86,19 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ language, preferredPla
             exit={{ opacity: 0, x: 10 }}
             className="space-y-6"
           >
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {SOUNDS.map((sound) => (
                 <button
                   key={sound.id}
                   onClick={() => toggleSound(sound.id)}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${
+                  className={`flex items-center justify-center gap-4 p-4 rounded-2xl border transition-all ${
                     activeSound === sound.id
-                      ? 'bg-indigo-50 border-brand-indigo text-brand-indigo'
+                      ? 'bg-indigo-50 border-brand-indigo text-brand-indigo shadow-sm'
                       : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-300'
                   }`}
                 >
-                  <sound.icon className={`w-5 h-5 mb-2 ${activeSound === sound.id ? 'animate-pulse' : ''}`} />
-                  <span className="text-[9px] font-black uppercase tracking-widest">{sound.names[language || 'tr']}</span>
+                  <sound.icon className={`w-5 h-5 ${activeSound === sound.id ? 'animate-pulse' : ''}`} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">{sound.names[language || 'tr']}</span>
                 </button>
               ))}
             </div>

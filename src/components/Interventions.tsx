@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, ShieldAlert, Zap, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Language, translations } from '../lib/i18n';
 
-export const NuclearMode: React.FC<{ isActive: boolean }> = ({ isActive }) => {
+export const NuclearMode: React.FC<{ isActive: boolean; language?: Language }> = ({ isActive, language = 'tr' }) => {
   const [showWarning, setShowWarning] = useState(false);
+  const t = translations[language || 'tr'].nuclear;
 
   useEffect(() => {
     if (isActive) {
       const handleVisibilityChange = () => {
         if (document.hidden) {
           // In a real extension this would block, here we just track or warn
-          console.log('Nükleer Mod: Sekme değiştirildi!');
+          console.log('Nuclear Mode: tab switched!');
         }
       };
       document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -26,17 +28,17 @@ export const NuclearMode: React.FC<{ isActive: boolean }> = ({ isActive }) => {
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-widest">Nükleer Mod</h3>
-            <p className="text-[10px] text-zinc-500 font-medium">MUTLAK ODAK KORUMASI</p>
+            <h3 className="text-sm font-bold uppercase tracking-widest">{t.title}</h3>
+            <p className="text-[10px] text-zinc-500 font-medium">{t.sub}</p>
           </div>
         </div>
         <div className="text-xs font-mono font-bold text-red-500">
-           {isActive ? 'AKTİF' : 'DEVRE DIŞI'}
+           {isActive ? t.active : t.inactive}
         </div>
       </div>
 
       <p className="text-xs text-zinc-400 leading-relaxed">
-        Aktifken, dikkat dağıtıcı tüm bildirimler ve otopilot gezinme engellenir. Caydırıcı görseller devreye girer.
+        {t.desc}
       </p>
 
       {isActive && (
@@ -46,7 +48,7 @@ export const NuclearMode: React.FC<{ isActive: boolean }> = ({ isActive }) => {
           className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-[10px] font-bold uppercase"
         >
           <Zap className="w-3 h-3" />
-          Pay-to-Pass Sistemi Devreye Girdi
+          {t.warning}
         </motion.div>
       )}
     </div>

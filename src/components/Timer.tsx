@@ -6,57 +6,42 @@ import confetti from 'canvas-confetti';
 import { translations, Language } from '../lib/i18n';
 
 interface TimerProps {
-  onComplete: (isFocus: boolean) => void;
   language: Language;
+  onComplete: (isFocus: boolean) => void;
+  focusLength: number;
+  setFocusLength: (len: number) => void;
+  breakLength: number;
+  setBreakLength: (len: number) => void;
+  timeLeft: number;
+  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
+  isActive: boolean;
+  setIsActive: (active: boolean) => void;
+  isFocus: boolean;
+  setIsFocus: (isFocus: boolean) => void;
 }
 
-export const Timer: React.FC<TimerProps> = ({ onComplete, language }) => {
+export const Timer: React.FC<TimerProps> = ({ 
+  language,
+  focusLength,
+  setFocusLength,
+  breakLength,
+  setBreakLength,
+  timeLeft,
+  setTimeLeft,
+  isActive,
+  setIsActive,
+  isFocus,
+  setIsFocus,
+  onComplete,
+}) => {
   const t = translations[language || 'tr'].timer;
-  const [focusLength, setFocusLength] = useState(25);
-  const [breakLength, setBreakLength] = useState(5);
-  const [timeLeft, setTimeLeft] = useState(focusLength * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [isFocus, setIsFocus] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
 
   const toggleTimer = () => setIsActive(!isActive);
 
   const resetTimer = useCallback(() => {
     setIsActive(false);
     setTimeLeft((isFocus ? focusLength : breakLength) * 60);
-  }, [isFocus, focusLength, breakLength]);
-
-  useEffect(() => {
-    if (!isActive) {
-      setTimeLeft((isFocus ? focusLength : breakLength) * 60);
-    }
-  }, [focusLength, breakLength, isFocus, isActive]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
-      onComplete(isFocus);
-      if (isFocus) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#10B981', '#6366F1']
-        });
-      }
-      setIsFocus(!isFocus);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, timeLeft, isFocus, onComplete]);
+  }, [isFocus, focusLength, breakLength, setIsActive, setTimeLeft]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

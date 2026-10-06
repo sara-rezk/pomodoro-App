@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Check, Trash2, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Check, Trash2, Sparkles, Loader2, ListPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Task, getTasks, saveTasks } from '../lib/storage';
 
@@ -14,6 +14,29 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ language }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newGoal, setNewGoal] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [addedIds, setAddedIds] = useState<string[]>([]);
+
+  const handleAddToSession = (task: Task) => {
+    try {
+      const stored = localStorage.getItem('lumina_session_todos');
+      const currentTodos = stored ? JSON.parse(stored) : [];
+      const exists = currentTodos.some((t: any) => t.text === task.title);
+      if (!exists) {
+        const newTodo = {
+          id: crypto.randomUUID(),
+          text: task.title,
+          completed: false,
+        };
+        localStorage.setItem('lumina_session_todos', JSON.stringify([...currentTodos, newTodo]));
+      }
+      setAddedIds((prev) => [...prev, task.id]);
+      setTimeout(() => {
+        setAddedIds((prev) => prev.filter((id) => id !== task.id));
+      }, 2000);
+    } catch (e) {
+      console.error('Failed to add task to session todos', e);
+    }
+  };
 
   useEffect(() => {
     getTasks().then(setTasks);
@@ -54,7 +77,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ language }) => {
       const response = await fetch('/api/ai/breakdown', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal: newGoal }),
+        body: JSON.stringify({ goal: newGoal, language }),
       });
       const data = await response.json();
       if (data.tasks) {
@@ -157,6 +180,21 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({ language }) => {
                 <span className="text-[9px] font-mono font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
                   {task.duration}M
                 </span>
+                <button
+                  onClick={() => handleAddToSession(task)}
+                  disabled={addedIds.includes(task.id)}
+                  className={`p-1.5 rounded-lg border flex items-center gap-1 text-[9px] font-black uppercase tracking-wider transition-all active:scale-95 ${
+                    addedIds.includes(task.id)
+                      ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                      : 'bg-indigo-50/50 hover:bg-indigo-50 border-indigo-100/60 text-brand-indigo'
+                  }`}
+                  title={t.addToSession}
+                >
+                  <ListPlus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">
+                    {addedIds.includes(task.id) ? t.addedToSession : t.addToSession}
+                  </span>
+                </button>
                 <button
                   onClick={() => removeTask(task.id)}
                   className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"

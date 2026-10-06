@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Upload, Plus } from 'lucide-react';
 import { savePDF, getStoredPDF, clearStoredPDF } from '../lib/pdfStorage';
+import { Language, translations } from '../lib/i18n';
 
-export const PDFViewer: React.FC = () => {
+interface PDFViewerProps {
+  language?: Language;
+}
+
+export const PDFViewer: React.FC<PDFViewerProps> = ({ language = 'tr' }) => {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const t = translations[language || 'tr'].library;
 
   useEffect(() => {
     const loadStored = async () => {
@@ -65,13 +72,13 @@ export const PDFViewer: React.FC = () => {
             <FileText className="w-6 h-6 text-brand-indigo" />
           </div>
           <div>
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-800">Kütüphane Sistemi</h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{fileName || 'Belge Yüklenmedi'}</p>
+            <h3 className="text-sm font-black uppercase tracking-widest text-slate-800">{t.title}</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{fileName || t.noDocument}</p>
           </div>
         </div>
         <label className="cursor-pointer bg-brand-indigo text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 shadow-neon flex items-center gap-2">
           <Upload className="w-4 h-4" />
-          Protokol Yükle
+          {t.upload}
           <input type="file" accept=".pdf" className="hidden" onChange={handleFileChange} />
         </label>
       </div>
@@ -89,7 +96,7 @@ export const PDFViewer: React.FC = () => {
                  onClick={handleClose}
                  className="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-white transition-colors border border-slate-100"
                >
-                 Kapat
+                 {t.close}
                </button>
             </div>
           </div>
@@ -99,9 +106,9 @@ export const PDFViewer: React.FC = () => {
               <Plus className="w-8 h-8 text-slate-300" />
             </div>
             <div className="space-y-2">
-              <p className="font-black uppercase tracking-[0.3em] text-slate-500 text-sm">Arşiv Boş</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase max-w-[240px] leading-relaxed">
-                Okumak istediğiniz akademik makaleyi veya notu buraya yükleyerek odak modunda inceleyin.
+              <p className="font-black uppercase tracking-[0.3em] text-slate-500 text-sm">{t.emptyArchive}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase max-w-[280px] leading-relaxed">
+                {t.emptyDesc}
               </p>
             </div>
           </div>

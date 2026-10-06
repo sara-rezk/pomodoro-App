@@ -9,30 +9,44 @@ interface AchievementsProps {
 }
 
 export const Achievements: React.FC<AchievementsProps> = ({ language, onClose }) => {
-  const t = translations[language || 'tr'].nav;
+  const tNav = translations[language || 'tr'].nav;
+  const tList = translations[language || 'tr'].achievementsList;
   
-  const achievements = [
-    { id: 1, title: 'Early Bird', desc: 'Study before 7 AM', icon: Star, color: 'text-amber-500', unlocked: true },
-    { id: 2, title: 'Deep Diver', desc: 'Complete 4 focus sessions', icon: Zap, color: 'text-blue-500', unlocked: true },
-    { id: 3, title: 'On Fire', desc: 'Maintain a 5-day streak', icon: Flame, color: 'text-orange-500', unlocked: true },
-    { id: 4, title: 'Synthesizer', desc: 'Create 50 AI Flashcards', icon: Brain, color: 'text-purple-500', unlocked: false },
-    { id: 5, title: 'Strategic Thinker', desc: 'Decompose 10 complex tasks', icon: Target, color: 'text-emerald-500', unlocked: true },
-    { id: 6, title: 'The Architect', desc: 'Complete a long-term goal', icon: Trophy, color: 'text-yellow-500', unlocked: false },
-    { id: 7, title: 'Polymath', desc: 'Upload 5 documents to library', icon: Book, color: 'text-indigo-500', unlocked: false },
+  const icons = [Star, Zap, Flame, Brain, Target, Trophy, Book];
+  const colors = [
+    'text-amber-500',
+    'text-blue-500',
+    'text-orange-500',
+    'text-purple-500',
+    'text-emerald-500',
+    'text-yellow-500',
+    'text-indigo-500'
   ];
+  const unlocked = [true, true, true, false, true, false, false];
+
+  const achievements = tList.items.map((item, idx) => ({
+    id: idx + 1,
+    title: item.title,
+    desc: item.desc,
+    icon: icons[idx] || Star,
+    color: colors[idx] || 'text-indigo-500',
+    unlocked: unlocked[idx] ?? true
+  }));
 
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="glass-panel p-8 max-w-2xl w-full"
+      className="glass-panel p-6 md:p-8 max-w-2xl w-full max-h-[85vh] overflow-y-auto custom-scrollbar"
     >
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
           <Award className="w-8 h-8 text-brand-indigo" />
-          {t.achievements}
+          {tNav.achievements}
         </h2>
-        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold uppercase text-[10px] tracking-widest">Kapat</button>
+        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold uppercase text-[10px] tracking-widest cursor-pointer">
+          {tList.close}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -43,7 +57,7 @@ export const Achievements: React.FC<AchievementsProps> = ({ language, onClose })
               ach.unlocked ? 'bg-white border-slate-100 shadow-sm' : 'bg-slate-50 border-slate-100 grayscale opacity-60'
             }`}
           >
-            <div className={`p-3 rounded-xl bg-slate-50 ${ach.unlocked ? ach.color : 'text-slate-300'}`}>
+            <div className={`p-3 rounded-xl bg-slate-50 shrink-0 ${ach.unlocked ? ach.color : 'text-slate-300'}`}>
               <ach.icon className="w-6 h-6" />
             </div>
             <div>

@@ -15,6 +15,9 @@ export const Flashcards: React.FC<FlashcardProps> = ({ language }) => {
   const [inputText, setInputText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [creatorMode, setCreatorMode] = useState<'ai' | 'manual'>('ai');
+  const [manualQuestion, setManualQuestion] = useState('');
+  const [manualAnswer, setManualAnswer] = useState('');
 
   useEffect(() => {
     getFlashcards().then(setCards);
@@ -27,7 +30,7 @@ export const Flashcards: React.FC<FlashcardProps> = ({ language }) => {
       const response = await fetch('/api/ai/flashcards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify({ text: inputText, language }),
       });
       const data = await response.json();
       if (data.cards) {
@@ -47,9 +50,27 @@ export const Flashcards: React.FC<FlashcardProps> = ({ language }) => {
     } catch (error) {
       console.error('Flashcard AI Error:', error);
     } finally {
-      setIsGenerating(true); // Wait, setting to true? Typo fixed to false below
       setIsGenerating(false);
     }
+  };
+
+  const handleAddManual = () => {
+    if (!manualQuestion.trim() || !manualAnswer.trim()) return;
+    const newCard: Flashcard = {
+      id: crypto.randomUUID(),
+      question: manualQuestion.trim(),
+      answer: manualAnswer.trim(),
+      interval: 0,
+      repetition: 0,
+      easeFactor: 2.5,
+      nextReview: new Date().toISOString(),
+    };
+    const updated = [...cards, newCard];
+    setCards(updated);
+    saveFlashcards(updated);
+    setManualQuestion('');
+    setManualAnswer('');
+    setCurrentIndex(updated.length - 1);
   };
 
   const nextCard = () => {
@@ -88,24 +109,111 @@ export const Flashcards: React.FC<FlashcardProps> = ({ language }) => {
           </div>
 
           <div className="glass-panel p-6 space-y-4">
-            <h3 className="text-xs font-bold flex items-center gap-2 uppercase tracking-[0.2em] text-slate-400">
-              <Brain className="w-4 h-4 text-brand-indigo" />
-              {t.generator}
-            </h3>
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder={t.placeholder}
-              className="w-full h-32 bg-slate-50 border border-slate-100 rounded-xl p-4 focus:outline-none focus:border-brand-indigo transition-colors text-xs resize-none text-slate-600"
-            />
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating || !inputText.trim()}
-              className="w-full bg-brand-indigo text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-98 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {t.generate}
-            </button>
+            <div className="flex border-b border-slate-100 pb-2 mb-2 items-center justify-between">
+              <h3 className="text-xs font-black flex items-center gap-2 uppercase tracking-[0.1em] text-slate-500">
+                <Brain className="w-4 h-4 text-brand-indigo animate-pulse" />
+                Memory Lab
+              </h3>
+              <div className="flex gap-1.5 bg-slate-100/80 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setCreatorMode('ai')}
+                  className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                    creatorMode === 'ai' 
+                      ? 'bg-white text-brand-indigo shadow-sm' 
+                      : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  AI
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCreatorMode('manual')}
+                  className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                    creatorMode === 'manual' 
+                      ? 'bg-white text-brand-indigo shadow-sm' 
+                      : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  Manuel
+                </button>
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {creatorMode === 'ai' ? (
+                <motion.div
+                  key="ai-mode"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="space-y-4"
+                >
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                    {t.generator}
+                  </p>
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder={t.placeholder}
+                    className="w-full h-32 bg-slate-50 border border-slate-100 rounded-xl p-4 focus:outline-none focus:border-brand-indigo transition-all text-xs resize-none text-slate-600 placeholder:text-slate-300"
+                  />
+                  <button
+                    onClick={handleGenerate}
+                    disabled={isGenerating || !inputText.trim()}
+                    className="w-full bg-brand-indigo text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-98 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-neon-sm"
+                  >
+                    {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {t.generate}
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="manual-mode"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="space-y-4"
+                >
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                    {t.manualTitle}
+                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                        {t.questionLabel}
+                      </label>
+                      <input 
+                        type="text"
+                        value={manualQuestion}
+                        onChange={(e) => setManualQuestion(e.target.value)}
+                        placeholder={t.questionPlaceholder}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-indigo transition-all text-xs text-slate-600 placeholder:text-slate-300"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                        {t.answerLabel}
+                      </label>
+                      <textarea
+                        value={manualAnswer}
+                        onChange={(e) => setManualAnswer(e.target.value)}
+                        placeholder={t.answerPlaceholder}
+                        className="w-full h-24 bg-slate-50 border border-slate-100 rounded-xl p-4 focus:outline-none focus:border-brand-indigo transition-all text-xs resize-none text-slate-600 placeholder:text-slate-300"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleAddManual}
+                    disabled={!manualQuestion.trim() || !manualAnswer.trim()}
+                    className="w-full bg-brand-indigo text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:scale-[1.02] active:scale-98 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-neon-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {t.addManual}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
